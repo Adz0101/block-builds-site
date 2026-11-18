@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Block Builds — Coming Soon</title>
+<meta name="description" content="Block Builds. A better space is taking shape. Coming soon.">
+<style>
+:root{color-scheme:dark;--bg:#0b1420;--accent:#efad64;--muted:#adbac9}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#fff}body{overflow-x:hidden}
+.page{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate;background:radial-gradient(ellipse at 52% 56%,#233349 0%,#111e2e 52%,#0b1420 100%);padding:48px 16px 24px}
+.page:before{content:"";pointer-events:none;position:absolute;inset:0;opacity:.11;background-image:linear-gradient(#8190a622 1px,transparent 1px),linear-gradient(90deg,#8190a622 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,transparent,#000 35%,transparent)}
+.brand{display:flex;gap:12px;align-items:center;z-index:1;letter-spacing:.24em;font-size:clamp(14px,2.1vw,20px);font-weight:800}.mark{width:33px;height:33px;position:relative;transform:rotate(-30deg)}.mark i{display:block;position:absolute;width:21px;height:14px;border:3px solid var(--accent);transform:skewY(-20deg)}.mark i:first-child{top:4px;left:0}.mark i:last-child{top:15px;left:12px}
+.eyebrow{text-align:center;margin:26px 0 7px;z-index:1;font-weight:700;font-size:11px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase}.headline{font-size:clamp(42px,8vw,84px);line-height:1.04;letter-spacing:-.065em;text-align:center;margin:0;z-index:1;font-weight:850}.headline span{color:var(--accent)}.subhead{text-align:center;max-width:480px;margin:16px 0 4px;line-height:1.6;font-size:clamp(14px,1.7vw,17px);color:var(--muted);z-index:1}
+.stage{width:min(100%,1050px);position:relative;margin:4px auto 0;z-index:1}.stage canvas{width:100%;height:auto;display:block;aspect-ratio:1000 / 480}.stage:after{content:"";position:absolute;height:35px;left:14%;right:14%;bottom:6%;background:#050b13;filter:blur(24px);z-index:-1;opacity:.45}
+.bottom{z-index:1;margin-top:5px;display:flex;gap:13px;align-items:center;text-transform:uppercase;font-size:10px;letter-spacing:.22em;color:#8c9aab}.pulse{height:7px;width:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 0 4px #efad6425;animation:pulse 1.8s infinite}@keyframes pulse{50%{box-shadow:0 0 0 9px #efad6408;opacity:.55}}.footer{color:#5d6d80;font-size:11px;margin-top:22px;z-index:1}
+@media(max-width:600px){.page{justify-content:flex-start;padding-top:58px}.stage{width:calc(100% + 25px);margin:22px -12px 0}.brand{font-size:14px}.subhead{max-width:310px}.bottom{margin-top:15px}}
+@media(prefers-reduced-motion:reduce){.pulse{animation:none}}
+</style>
+</head>
+<body><main class="page"><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i></span> BLOCK BUILDS</div><p class="eyebrow">Something great is under construction</p><h1 class="headline">COMING <span>SOON.</span></h1><p class="subhead">Thoughtfully built spaces. Big ideas in the making.<br>Watch this space — we're building something exciting.</p><div class="stage"><canvas id="scene" width="1000" height="480" role="img" aria-label="Animated miniature construction workers building a modern brick office, placing bricks one by one until the finished office appears"></canvas></div><div class="bottom"><span class="pulse"></span> Building our future, brick by brick</div><div class="footer">© <span id="year"></span> Block Builds</div></main>
+<script>
+(() => {
+'use strict';
+document.getElementById('year').textContent = new Date().getFullYear();
+const canvas=document.getElementById('scene'),c=canvas.getContext('2d');
+const W=1000,H=480;
+let started=performance.now();const duration=18000;
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const ease=t=>{t=clamp(t);return t*t*(3-2*t)};
+function rect(x,y,w,h,color){c.fillStyle=color;c.fillRect(x,y,w,h)}
+function round(x,y,w,h,r,color){c.fillStyle=color;c.beginPath();c.roundRect(x,y,w,h,r);c.fill()}
+function line(x,y,X,Y,color,width=2){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x,y);c.lineTo(X,Y);c.stroke()}
+function poly(pts,color){c.fillStyle=color;c.beginPath();c.moveTo(...pts[0]);pts.slice(1).forEach(p=>c.lineTo(...p));c.closePath();c.fill()}
+function circle(x,y,r,color){c.fillStyle=color;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill()}
+function worker(x,y,phase,scale=1,carry=false,flip=false){c.save();c.translate(x,y);c.scale(flip?-scale:scale,scale);
+ let step=Math.sin(phase*2.9),arm=Math.sin(phase*2.9+.5);
+ // shadow
+ c.fillStyle='#07121d65';c.beginPath();c.ellipse(0,3,18,4,0,0,Math.PI*2);c.fill();
+ line(-3,-24,-7+step*5,-1,'#263e56',6);line(5,-24,7-step*5,-1,'#263e56',6);
+ line(-7+step*5,-1,-13+step*5,0,'#111923',5);line(7-step*5,-1,14-step*5,0,'#111923',5);
+ round(-11,-53,22,28,5,'#e4a64c');rect(-2,-51,4,24,'#f8d78c');
+ line(-9,-47,-15-arm*3,-28,'#d7a17b',6);line(9,-47,15+arm*3,-30,'#d7a17b',6);
+ if(carry){round(8,-39,20,10,2,'#b76b4c');line(10,-36,22,-36,'#ecc0a2',2)}
+ circle(0,-66,10,'#d5a07c');round(-12,-76,24,8,3,'#f7bb44');round(-9,-83,18,10,5,'#f7bb44');rect(-13,-76,26,3,'#d59133');
+ c.restore()}
+function brick(x,y,w,h,variation){rect(x,y,w,h,variation%5===0?'#bc765c':variation%4===0?'#d58e6b':'#c58264');rect(x,y,w,2,'#e4a080');rect(x+w-2,y,2,h,'#8c5149');rect(x,y+h-2,w,2,'#985849')}
+function draw(t,now){c.clearRect(0,0,W,H);let progress=reduce?1:t;
+ // ambient distant skyline
+ for(let i=0;i<15;i++){let x=i*76-15,ht=30+(i*47)%65;rect(x,325-ht,52,ht,'#63768c11')}
+ // skyline soft streaks
+ line(60,354,940,354,'#8096a525',1);
+ // crane
+ line(816,97,816,353,'#668092',6);line(797,100,833,100,'#7f91a0',6);line(818,97,890,97,'#7f91a0',4);line(818,97,724,97,'#7f91a0',4);
+ for(let i=0;i<5;i++){let x=735+i*20;line(x,97,x+20,115,'#668092',1.5);line(x,115,x+20,97,'#668092',1.5)}
+ line(727,97,816,97,'#8193a4',3);line(748,97,748,180,'#8999a6',2);
+ const lift=ease((progress-.23)/.4),hookY=180+lift*32+Math.sin(now*.0015)*3;
+ line(748,96,748,hookY,'#8494a3',1.5);line(748,hookY,738,hookY+13,'#dfae6d',3);line(738,hookY+13,749,hookY+18,'#dfae6d',3);
+ // ground and foundation
+ c.fillStyle='#162a3a';c.beginPath();c.ellipse(504,387,425,38,0,0,Math.PI*2);c.fill();
+ round(173,350,659,25,3,'#445160');rect(173,350,659,5,'#77838f');rect(192,375,630,8,'#1f3242');
+ // scattered materials left
+ for(let j=0;j<3;j++)for(let i=0;i<5-j;i++)brick(139+i*25+j*12,350-j*15,23,14,i+j*7);
+ // pallets and wheelbarrow
+ poly([[797,345],[843,345],[831,359],[807,359]],'#a06e53');line(812,355,800,374,'#8da0ad',3);line(833,356,850,370,'#8da0ad',3);circle(805,375,6,'#172333');circle(805,375,2,'#7f90a1');
+ // building body per-brick reveal (one brick at a time)
+ const bx=305,by=345,bw=390,rows=12,cols=15,brickH=16,brickW=bw/cols;
+ const fill=clamp(progress/.66)*rows*cols;
+ for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
+   let index=row*cols+col;let vis=clamp((fill-index)*2);
+   if(!vis)continue;
+   let x=bx+col*brickW, y=by-(row+1)*brickH;
+   // front opening windows + main door: cover later with glass
+   let localX=x-bx,localY=y-(by-rows*brickH);
+   let window1=(localX>=58&&localX<152&&localY>=47&&localY<140);
+   let window2=(localX>=232&&localX<326&&localY>=47&&localY<140);
+   let door=(localX>=160&&localX<230&&localY>=116);
+   if(window1||window2||door)continue;
+   c.save();c.globalAlpha=vis;brick(x+1,y+1,brickW-2,brickH-2,row*17+col);c.restore();
+ }
+ // dark building edge + right wall
+ c.globalAlpha=ease((progress-.23)/.33);poly([[695,153],[728,172],[728,345],[695,345]],'#805744');for(let i=0;i<12;i++)line(695,345-i*16,728,345-i*16,'#583f3b',1);c.globalAlpha=1;
+ // glazed windows emerge after wall is established
+ let windows=ease((progress-.53)/.14);
+ c.save();c.globalAlpha=windows;
+ function windowpane(x,y,w,h){round(x,y,w,h,2,'#263747');rect(x+5,y+5,w-10,h-10,'#79afbb');poly([[x+5,y+5],[x+w-14,y+5],[x+21,y+h-5],[x+5,y+h-5]],'#b6d4d255');rect(x+w*.51,y+5,4,h-10,'#314658');rect(x+5,y+h*.53,w-10,4,'#314658');rect(x+9,y+10,3,h-20,'#e9f5ee33')}
+ windowpane(363,200,94,96);windowpane(537,200,94,96);
+ // door
+ round(471,270,58,75,1,'#263747');rect(476,275,48,70,'#508795');rect(500,275,3,70,'#2a4658');circle(511,313,2,'#f2c17b');rect(471,345,58,5,'#a6afb3');
+ c.restore();
+ // roof drops in from crane
+ let roof=ease((progress-.67)/.12);if(roof>0){c.save();c.globalAlpha=roof;let drop=(1-roof)*-70;rect(292,147+drop,416,15,'#d9e0db');rect(292,147+drop,416,5,'#f4f1df');rect(695,150+drop,42,12,'#a7b5b7');c.restore()}
+ // decorative cornice and brand on roof
+ let sign=ease((progress-.78)/.13);c.save();c.globalAlpha=sign;
+ round(432,164,137,23,3,'#243847');c.font='bold 12px system-ui';c.textAlign='center';c.letterSpacing='1px';c.fillStyle='#f7cf98';c.fillText('BLOCK BUILDS',500,180);c.restore();
+ // walk cycle and workers. Four people stay on screen
+ let a=now*.002;
+ worker(245+Math.sin(a*.45)*22,353,a,1.07,Math.sin(a*.2)>-.1,false);
+ worker(760+Math.sin(a*.7)*16,353,a+1,1.03,false,true);
+ worker(590+Math.sin(a*.45+2)*24,383,a+2,.9,true,true);
+ // mason raised on platform near active wall
+ let platform=clamp(progress/.40);c.save();c.globalAlpha=.15+.85*platform;
+ rect(263,274,95,5,'#8b9b9d');line(274,278,270,350,'#7f8d91',3);line(346,278,352,350,'#7f8d91',3);
+ worker(299,273,a+.8,.72,true,false);c.restore();
+ // flying brick into place during main phase
+ if(progress<.67){let f=(progress*rows*cols)%1,idx=Math.floor(progress*rows*cols),r=Math.floor(idx/cols),col=idx%cols;let targetX=bx+col*brickW,targetY=by-(r+1)*brickH;
+ let srcX=245,srcY=290;let vx=srcX+(targetX-srcX)*ease(f),vy=srcY+(targetY-srcY)*ease(f)-Math.sin(Math.PI*f)*80;
+ brick(vx,vy,brickW-3,brickH-3,idx)}
+ // dust particles
+ if(progress<.88){for(let i=0;i<13;i++){let p=(now*.00025+i*.153)%1,x=309+(i*31)%385,y=349-p*24;circle(x,y,1+(i%3)*.35,`rgba(244,201,149,${(1-p)*.27})`)}}
+ // completion glow
+ let glow=ease((progress-.87)/.11);if(glow){c.globalAlpha=glow*.6;c.fillStyle='#f2c18b';for(let i=0;i<6;i++){let xx=365+i*53,yy=128+Math.sin(now*.001+i)*4;circle(xx,yy,1.5,'#f2c18b')}c.globalAlpha=1}
+}
+function frame(now){let t=reduce?1:((now-started)%duration)/duration;draw(t,now);if(!reduce)requestAnimationFrame(frame)}requestAnimationFrame(frame);
+})();
+</script></body></html>
